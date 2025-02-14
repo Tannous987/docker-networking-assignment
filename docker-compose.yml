@@ -1,23 +1,43 @@
+#Defines the Compose file format version.
+#Version "3" is compatible with most modern Docker versions.
 version: "3"
+
+#Specifies the containers that will be created.
 services:
+  #Defines a service called producer (Flask app that generates data).
   producer:
+    #Build the Docker Image for the Producer
     build: ./producer
+    #Connects the producer service to a custom bridge network called app-network.
+    #Allows producer and consumer to communicate using service names.
     networks:
       - app-network
+    #Maps port 5000 on the host machine to port 5000 inside the container.
+    #So, the producer Flask API can be accessed at http://localhost:5000/data
     ports:
       - "5000:5000"
 
+  #Defines a service called consumer (fetches data from producer).
   consumer:
+    #Builds the Docker image from the Dockerfile inside the ./consumer directory.
     build: ./consumer
+    #connects consumer to app-network, allowing it to fetch data from producer using http://producer:5000/data.
     networks:
       - app-network
+    #Mounts a persistent volume called logs to /data inside the consumer container.
+    #Ensures logs aren't lost when the container restarts.
     volumes:
       - logs:/data
+    #Ensures consumer starts after producer, but does NOT wait for it to be ready.
     depends_on:
       - producer
 
+#Creates a custom bridge network (app-network).
+#Ensures that producer and consumer can communicate using service names instead of IP addresses.
 networks:
   app-network:
 
+#Creates a named volume (logs) to persist data.
+#Ensures logs remain even if the container is removed.
 volumes:
   logs:
