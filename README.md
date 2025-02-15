@@ -116,7 +116,28 @@ By default, Docker commands require `sudo`. To run Docker without `sudo`, add yo
    - The Producer will generate random logs.
    - The Consumer will retrieve logs and store them.
 
-3. Stop the containers when done:
+3. In a new terminal check that docker-compose up --build have created everything images, container, volume and network:
+   ```bash
+   docker images
+   docker ps -a
+   docker volume ls
+   docker network ls
+   ```
+## Important Notes
+
+**Note:** 
+- Because in Docker Compose we didn't explicitly specify the names for containers, volumes, networks, or images, Docker will automatically assign names based on the folder where the docker-compose.yml file is located (docker-networking-assignment), followed by the name of the service.
+> **Note on Container Naming:**
+> By default, Docker Compose appends _1 to the container name. This is part of Docker's naming convention, where the _1 ensures that the container has a unique name, even if there's just one instance running.
+> If you scale the service and run multiple instances, Docker will append additional numerical suffixes (e.g., _2, _3, etc.) to differentiate between containers.
+   
+4. In the same terminal check what is written in /data/log.txt in the consumer container:
+   ```bash
+   docker exec -it docker-networking-assignment_consumer_1 /bin/sh
+   cat /data/logs.txt
+   ```
+   - replace with tail to see only last 10 lines 
+5. In the same terminal to stop the containers use:
    ```bash
    docker-compose down
    ```
@@ -126,7 +147,7 @@ Even after stopping the containers, logs are stored in the Docker volume. To che
    ```bash
    sudo tail /var/lib/docker/volumes/docker-networking-assignment_logs/_data/logs.txt
    ```
-   -replace tail with cat to see the whole file.
+   - replace tail with cat to see the whole file.
 
 This ensures data persistence across container restarts.
 
